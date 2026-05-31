@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { ArrowRight, ShoppingBag, CreditCard, MapPin, Check } from "lucide-react";
 import Header from "@/components/layout/Header";
@@ -523,15 +524,11 @@ export default function CheckoutPage() {
         ),
       );
 
-      await Promise.all(
-        dataCart.map((item) =>
-          fetch("/api/client/delete_cart_client", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id_item: item._id }),
-          }),
-        ),
-      );
+      await fetch("/api/client/clear_cart", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_user }),
+      });
 
       setDataCart([]);
       await refreshCartCount();
@@ -626,10 +623,12 @@ export default function CheckoutPage() {
                     dataCart.map((item) => (
                       <div key={item._id} className="flex gap-4 p-4 bg-card rounded-xl border border-border">
                         <Link href={`/product/${item.id_product?._id}`} className="shrink-0">
-                          <img
-                            src={item.caracteristique_couleur?.img || item.id_product?.array_ProductImg?.[0]?.secure_url}
+                          <Image
+                            src={item.caracteristique_couleur?.img || item.id_product?.array_ProductImg?.[0]?.secure_url || "/placeholder.svg"}
                             alt={item.id_product?.title?.fr || "Produit"}
-                            className="w-24 h-24 object-cover rounded-lg"
+                            width={96}
+                            height={96}
+                            className="object-cover rounded-lg"
                           />
                         </Link>
                         <div className="flex-1 min-w-0">

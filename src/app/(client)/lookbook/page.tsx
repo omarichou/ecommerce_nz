@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight, ShoppingBag, X } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/home/Footer";
@@ -169,7 +170,7 @@ export default function LookbookPage() {
                   : "opacity-0 translate-x-full scale-95"
               }`}
             >
-              <img src={l.image} alt={l.title} className="w-full h-full object-cover" />
+              <Image src={l.image} alt={l.title} fill className="object-cover" sizes="100vw" />
 
               <div className="absolute inset-0 bg-gradient-to-t from-charcoal via-transparent to-transparent" />
               <div className="absolute inset-0 bg-gradient-to-r from-charcoal/60 via-transparent to-charcoal/60" />
@@ -205,7 +206,7 @@ export default function LookbookPage() {
                             <X className="w-4 h-4" />
                           </button>
                           <Link href={`/product/${product.id}`}>
-                            <img src={product.images[0]} alt={product.title.fr} className="w-full h-40 object-cover" />
+                            <Image src={product.images[0]} alt={product.title.fr} width={256} height={160} className="w-full h-40 object-cover" />
                             <div className="p-4">
                               <h4 className="font-medium text-foreground line-clamp-1">{product.title.fr}</h4>
                               <p className="font-display text-lg font-bold text-primary mt-1">
@@ -293,10 +294,12 @@ export default function LookbookPage() {
                 className="group text-left rounded-3xl overflow-hidden border border-border/60 bg-card shadow-luxury hover:shadow-elevated transition-all"
               >
                 <div className="relative aspect-[4/3] overflow-hidden">
-                  <img
+                  <Image
                     src={item.image}
                     alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    fill
+                    sizes="(max-width: 768px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-500 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-charcoal/70 via-transparent to-transparent" />
                 </div>

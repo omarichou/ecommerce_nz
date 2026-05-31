@@ -3,8 +3,7 @@ import GithubProvider from "next-auth/providers/github";
 import CredentialsProvider from "next-auth/providers/credentials";
 import UserModal from "app/DBconfig/models/user";
 import { connectMongoDB } from "app/DBconfig/mongodb";
-import bcrypt from "bcrypt";`r`nimport { checkRateLimit, resetRateLimit } from "@/lib/rateLimit";\r\nimport { checkRateLimit, resetRateLimit } from "@/lib/rateLimit";
-import { checkRateLimit, resetRateLimit } from "@/lib/rateLimit";
+import bcrypt from "bcrypt";
 import { checkRateLimit, resetRateLimit } from "@/lib/rateLimit";
 
 

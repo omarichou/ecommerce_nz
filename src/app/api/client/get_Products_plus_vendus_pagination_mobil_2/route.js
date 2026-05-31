@@ -19,7 +19,7 @@ export async function GET(request) {
     const skip = (page - 1) * limit;
 
     // Build query
-    let query = { disponible: "disponible" };
+    let query = {};
     
     if (category) query.categorie = category;
     if (!isNaN(minPrice) && !isNaN(maxPrice)) {

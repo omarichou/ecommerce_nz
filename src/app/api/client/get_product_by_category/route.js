@@ -131,7 +131,6 @@ export async function GET(request) {
     // Construire la requête de recherche dans mon category
     let query = { 
       categorie: category_produit, 
-      disponible: "disponible" 
     };
 
    //Construire la requête de recherche dans tout les category si  searchTerm exist 

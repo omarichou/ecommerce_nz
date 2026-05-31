@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Image as ImageIcon, Package, Pencil, Plus, Tags, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Category } from "@/data/products";
+import Image from "next/image";
 
 export default function AdminCategoriesPage() {
   const { categories, products, addCategory, updateCategory, deleteCategory, refreshProducts } = useAdminData();
@@ -101,10 +102,12 @@ export default function AdminCategoriesPage() {
                 className="border-border/50 bg-card/50 backdrop-blur-sm overflow-hidden hover:shadow-lg transition-all duration-300 group"
               >
                 <div className="aspect-video relative overflow-hidden bg-muted">
-                  <img
+                  <Image
                     src={category.img_url}
                     alt={category.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
                     onError={(e) => {
                       (e.target as HTMLImageElement).src = "/placeholder.svg";
                     }}
@@ -168,7 +171,7 @@ export default function AdminCategoriesPage() {
               <div className="flex gap-2">
                 <Input value={formData.imgUrl} onChange={(e) => setFormData({ ...formData, imgUrl: e.target.value })} placeholder="https://example.com/image.jpg" />
                 <div className="w-12 h-10 rounded-lg bg-muted flex items-center justify-center overflow-hidden">
-                  {formData.imgUrl ? <img src={formData.imgUrl} alt="Preview" className="w-full h-full object-cover" /> : <ImageIcon className="w-5 h-5 text-muted-foreground" />}
+                  {formData.imgUrl ? <Image src={formData.imgUrl} alt="Preview" fill className="object-cover" sizes="48px" /> : <ImageIcon className="w-5 h-5 text-muted-foreground" />}
                 </div>
               </div>
             </div>

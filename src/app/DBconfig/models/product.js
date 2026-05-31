@@ -43,5 +43,11 @@ const productSchema = new Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+productSchema.index({ categorie: 1 });
+productSchema.index({ isPopular: 1, disponible: 1 });
+productSchema.index({ isNew: 1, disponible: 1 });
+productSchema.index({ purchaseCount: -1, disponible: 1 });
+productSchema.index({ status: 1, categorie: 1 });
+
 const ProductModal = models.Product || mongoose.model("Product", productSchema);
 module.exports = ProductModal;

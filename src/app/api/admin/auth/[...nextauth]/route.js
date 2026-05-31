@@ -16,11 +16,11 @@ import { checkRateLimit, resetRateLimit } from "@/lib/rateLimit";
 
 //       credentials: {},
 //       async authorize(credentials, req , res ) {
-        const email = String(credentials?.email || "").toLowerCase().trim();
-        const rateLimit = checkRateLimit(req, email);
-        if (!rateLimit.allowed) {
-          throw new Error(`Trop de tentatives, réessayez dans ${Math.ceil(rateLimit.retryAfterMs / 1000)} secondes.`);
-        }
+//         const email = String(credentials?.email || "").toLowerCase().trim();
+//         const rateLimit = checkRateLimit(req, email);
+//         if (!rateLimit.allowed) {
+//           throw new Error(`Trop de tentatives, réessayez dans ${Math.ceil(rateLimit.retryAfterMs / 1000)} secondes.`);
+//         }
 //         // Add logic here to look up the user from the credentials supplied
 
 //         // 2- connect to DB

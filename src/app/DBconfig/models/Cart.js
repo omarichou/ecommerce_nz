@@ -19,5 +19,8 @@ const CartSchema = new Schema({
   }
 }, { timestamps: true });
 
+CartSchema.index({ id_user: 1 });
+CartSchema.index({ id_user: 1, id_product: 1 });
+
 const CartModal = models.Cart || mongoose.model("Cart", CartSchema);
 module.exports = CartModal;

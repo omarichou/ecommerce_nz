@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   ArrowRight,
   Check,
@@ -122,6 +123,7 @@ type ProductApi = {
   title?: { fr?: string; ar?: string };
   price?: number;
   ancien_price?: number;
+  disponible?: string;
   categorie?: string;
   description?: { fr?: string; ar?: string };
   array_ProductImg?: { secure_url?: string }[];
@@ -291,10 +293,10 @@ export default function ProductDetailPage() {
   const ratingValue = 4.7;
   const savings = product?.ancien_price && unitPrice ? Math.max(product.ancien_price - unitPrice, 0) : 0;
 
-  const addToCartServer = async () => {
-    if (!product) return;
+  const addToCartServer = async (): Promise<boolean> => {
+    if (!product) return false;
     const id_user = resolveClientUserId(user?.id);
-    if (!id_user) return;
+    if (!id_user) return false;
 
     const caracteristique: Record<string, string> = {};
     Object.entries(selectedVariants).forEach(([key, value]) => {
@@ -333,23 +335,38 @@ export default function ProductDetailPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cartItem),
       });
-      if (!res.ok) throw new Error("add_cart");
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        toast.error(body?.error || "Impossible d'ajouter au panier");
+        return false;
+      }
       await refreshCartCount();
+      return true;
     } catch (error) {
       console.error(error);
       toast.error("Impossible d'ajouter au panier");
+      return false;
     }
   };
 
-  const handleAddToCart = () => {
+  const isUnavailable = product?.disponible !== "disponible";
+
+  const handleAddToCart = async () => {
     if (!product) {
       toast.error("Produit indisponible");
+      return false;
+    }
+    if (isUnavailable) {
+      toast.error("Ce produit n'est pas disponible actuellement");
       return false;
     }
     if (missingVariants.length > 0) {
       toast.error(`Veuillez sélectionner: ${missingVariants.join(", ")}`);
       return false;
     }
+
+    const serverOk = await addToCartServer();
+    if (!serverOk) return false;
 
     addToCart({
       productId: product._id,
@@ -358,8 +375,6 @@ export default function ProductDetailPage() {
       selectedColor: selectedColor?.type,
       price: unitPrice,
     });
-
-    void addToCartServer();
 
     toast.success("Produit ajouté au panier", {
       description: product.title?.fr || "Produit",
@@ -378,8 +393,8 @@ export default function ProductDetailPage() {
     }));
   };
 
-  const handleBuyNow = () => {
-    const added = handleAddToCart();
+  const handleBuyNow = async () => {
+    const added = await handleAddToCart();
     if (added) {
       router.push("/checkout");
     }
@@ -542,10 +557,12 @@ export default function ProductDetailPage() {
               onMouseLeave={() => setIsZoomed(false)}
               onClick={() => setShowFullscreen(true)}
             >
-              <img
-                src={galleryImages[selectedImage]}
+              <Image
+                src={galleryImages[selectedImage] || "/placeholder.svg"}
                 alt={product.title?.fr || "Produit"}
-                className={`w-full h-full object-cover transition-transform duration-500 ${
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className={`object-cover transition-transform duration-500 ${
                   isZoomed ? "scale-[2]" : "scale-100"
                 }`}
                 style={isZoomed ? { transformOrigin: `${zoomPosition.x}% ${zoomPosition.y}%` } : undefined}
@@ -603,7 +620,7 @@ export default function ProductDetailPage() {
                         : "border-border/60 opacity-70 hover:opacity-100 hover:border-primary/50"
                     }`}
                   >
-                    <img src={img} alt={`Vue ${idx + 1}`} className="w-full h-full object-cover" />
+                    <Image src={img || "/placeholder.svg"} alt={`Vue ${idx + 1}`} fill sizes="96px" className="object-cover" />
                   </button>
                 ))}
               </div>
@@ -771,10 +788,12 @@ export default function ProductDetailPage() {
                         >
                           <div className="aspect-square relative overflow-hidden bg-muted">
                             {color.img?.secure_url ? (
-                              <img
+                              <Image
                                 src={color.img.secure_url}
-                                alt={color.type}
-                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                                alt={color.type || "Couleur"}
+                                fill
+                                sizes="96px"
+                                className="object-cover group-hover:scale-110 transition-transform duration-300"
                               />
                             ) : (
                               <div className="w-full h-full flex items-center justify-center text-xs font-semibold text-foreground">
@@ -900,24 +919,22 @@ export default function ProductDetailPage() {
               <Button
                 variant="gold"
                 size="lg"
-                // className="flex-1 w-full h-14 text-base gap-2 group"
                 className="w-full h-14 text-base flex shadow-gold"
-
                 onClick={handleAddToCart}
-                disabled={missingVariants.length > 0}
+                disabled={missingVariants.length > 0 || isUnavailable}
               >
                 <ShoppingCart className="w-5 h-5 transition-transform group-hover:scale-110" />
-                Ajouter au panier
+                {isUnavailable ? "Produit indisponible" : "Ajouter au panier"}
               </Button>
               <Button
                 variant="outline"
                 size="lg"
                 className="w-full h-14 text-base border-primary text-primary hover:bg-primary hover:text-primary-foreground transition-all"
                 onClick={handleBuyNow}
-                disabled={missingVariants.length > 0}
+                disabled={missingVariants.length > 0 || isUnavailable}
               >
-                Acheter maintenant
-                <ArrowRight className="w-4 h-4 ml-2" />
+                {isUnavailable ? "Indisponible" : "Acheter maintenant"}
+                {!isUnavailable && <ArrowRight className="w-4 h-4 ml-2" />}
               </Button>
             </div>
 
@@ -1161,10 +1178,12 @@ export default function ProductDetailPage() {
             )}
 
             <div className="absolute inset-0 flex items-center justify-center">
-              <img
-                src={galleryImages[selectedImage]}
+              <Image
+                src={galleryImages[selectedImage] || "/placeholder.svg"}
                 alt={product.title?.fr || "Produit"}
-                className="w-full h-full object-contain"
+                fill
+                sizes="100vw"
+                className="object-contain"
               />
             </div>
 

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Search,
   ShoppingCart,
@@ -57,7 +57,6 @@ const collections = [
 const Header = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const { user, isAuthenticated, logout } = useAuth();
   const { cartCount } = useCart();
   const { favoritesCount } = useFavorites();
@@ -99,11 +98,12 @@ const Header = () => {
   }, []);
 
   useEffect(() => {
-    if (pathname === "/search") {
-      const urlQuery = searchParams.get("q") || "";
+    if (pathname === "/search" && typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const urlQuery = params.get("q") || "";
       setSearchQuery(urlQuery);
     }
-  }, [pathname, searchParams]);
+  }, [pathname]);
 
   useEffect(() => {
     if (isSearchModalOpen) {

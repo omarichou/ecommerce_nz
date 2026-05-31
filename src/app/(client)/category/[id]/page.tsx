@@ -800,7 +800,13 @@ export default function CategoryPage({ params }: PageProps) {
                 <div className="text-center px-6">
                   <div className="mx-auto mb-5 relative">
                     <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-2xl overflow-hidden shadow-2xl ring-4 ring-white/20 ring-offset-2 ring-offset-primary/30">
-                      <img src={currentCategory.img_url} alt={currentCategory.name} className="w-full h-full object-cover" />
+                      <Image
+                        src={currentCategory.img_url || "/placeholder.svg"}
+                        alt={currentCategory.name}
+                        width={96}
+                        height={96}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
                   </div>
 

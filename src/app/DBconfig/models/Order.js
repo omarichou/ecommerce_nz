@@ -61,5 +61,8 @@ const OrderSchema = new Schema({
   promoFreeShipping: { type: Boolean, default: false },
 });
 
+OrderSchema.index({ id_user: 1, createdAt: -1 });
+OrderSchema.index({ status: 1, createdAt: -1 });
+
 const OrderModal = models.Order || mongoose.model("Order", OrderSchema);
 module.exports = OrderModal;

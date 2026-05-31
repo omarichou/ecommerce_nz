@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Heart, Star, ShoppingBag, Eye, Sparkles, Check, X } from "lucide-react";
@@ -27,6 +28,7 @@ type ProductApi = {
   title?: { fr?: string; ar?: string };
   price?: number;
   ancien_price?: number;
+  disponible?: string;
   array_ProductImg?: { secure_url?: string }[];
   variant?: Variant[];
   variant_color?: VariantColor[];
@@ -123,22 +125,18 @@ const ProductCardModern = ({ product, index = 0 }: ProductCardModernProps) => {
     return basePrice + variantAdjustment + colorAdjustment;
   })();
 
+  const isUnavailable = quickProduct?.disponible !== "disponible";
+
   const handleConfirmQuickAdd = async () => {
     if (!quickProduct) return;
+    if (isUnavailable) {
+      toast.error("Ce produit n'est pas disponible actuellement");
+      return;
+    }
     if (missingVariants.length > 0) {
       toast.error(`Veuillez sélectionner: ${missingVariants.join(", ")}`);
       return;
     }
-
-    addToCart({
-      productId: quickProduct._id,
-      quantity,
-      selectedSize: Object.entries(selectedVariants)
-        .map(([key, val]) => `${key}: ${val.value}`)
-        .join(" • "),
-      selectedColor: selectedColor?.type,
-      price: unitPrice,
-    });
 
     const id_user = resolveClientUserId(user?.id);
     if (id_user) {
@@ -168,13 +166,28 @@ const ProductCardModern = ({ product, index = 0 }: ProductCardModernProps) => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(cartItem),
         });
-        if (res.ok) {
-          await refreshCartCount();
+        if (!res.ok) {
+          const body = await res.json().catch(() => ({}));
+          toast.error(body?.error || "Impossible d'ajouter au panier");
+          return;
         }
+        await refreshCartCount();
       } catch (error) {
         console.error(error);
+        toast.error("Impossible d'ajouter au panier");
+        return;
       }
     }
+
+    addToCart({
+      productId: quickProduct._id,
+      quantity,
+      selectedSize: Object.entries(selectedVariants)
+        .map(([key, val]) => `${key}: ${val.value}`)
+        .join(" • "),
+      selectedColor: selectedColor?.type,
+      price: unitPrice,
+    });
 
     toast.success("Ajouté au panier !", {
       description: quickProduct.title?.fr || product.title.fr,
@@ -209,26 +222,29 @@ const ProductCardModern = ({ product, index = 0 }: ProductCardModernProps) => {
           <div className="relative aspect-[3/4] sm:aspect-[4/5] overflow-hidden bg-muted">
             {!imageLoaded && <div className="absolute inset-0 animate-shimmer" />}
 
-            <img
+            <Image
               src={product.images[0]}
               alt={product.title.fr}
-              loading="lazy"
+              fill
               onLoad={() => setImageLoaded(true)}
               className={cn(
-                "w-full h-full object-cover transition-all duration-700",
+                "object-cover transition-all duration-700",
                 imageLoaded ? "opacity-100" : "opacity-0",
                 isHovered && product.images[1] ? "scale-110 opacity-0" : "scale-100",
               )}
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             />
 
             {product.images[1] && (
-              <img
+              <Image
                 src={product.images[1]}
                 alt={product.title.fr}
+                fill
                 className={cn(
-                  "absolute inset-0 w-full h-full object-cover transition-all duration-700",
+                  "object-cover transition-all duration-700",
                   isHovered ? "opacity-100 scale-100" : "opacity-0 scale-110",
                 )}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
               />
             )}
 
@@ -240,7 +256,11 @@ const ProductCardModern = ({ product, index = 0 }: ProductCardModernProps) => {
             />
 
             <div className="absolute top-2 left-2 right-2 sm:top-3 sm:left-3 sm:right-3 flex items-start justify-between">
-              {discount > 0 ? (
+              {product.disponible && product.disponible !== "disponible" ? (
+                <div className="bg-muted-foreground/80 text-muted text-[10px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full shadow-lg">
+                  Indisponible
+                </div>
+              ) : discount > 0 ? (
                 <div className="flex items-center gap-1 bg-destructive text-destructive-foreground text-[10px] sm:text-xs font-bold px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full shadow-lg">
                   <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                   -{discount}%
@@ -335,17 +355,23 @@ const ProductCardModern = ({ product, index = 0 }: ProductCardModernProps) => {
           ) : quickProduct ? (
             <div className="space-y-4">
               <div className="flex items-start gap-3">
-                <div className="w-16 h-16 rounded-lg bg-muted overflow-hidden">
-                  <img
+                <div className="relative w-16 h-16 rounded-lg bg-muted overflow-hidden">
+                  <Image
                     src={quickProduct.array_ProductImg?.[0]?.secure_url || product.images[0]}
                     alt={quickProduct.title?.fr || product.title.fr}
-                    className="w-full h-full object-cover"
+                    fill
+                    className="object-cover"
+                    sizes="64px"
                   />
                 </div>
                 <div>
                   <p className="font-medium text-foreground">{quickProduct.title?.fr || product.title.fr}</p>
                   <p className="text-sm text-muted-foreground">{unitPrice.toLocaleString()} DZD</p>
-
+                  {isUnavailable && (
+                    <span className="inline-block mt-1 text-xs font-medium text-destructive bg-destructive/10 px-2 py-0.5 rounded">
+                      Produit indisponible
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -431,10 +457,16 @@ const ProductCardModern = ({ product, index = 0 }: ProductCardModernProps) => {
                 </div>
                 <button
                   onClick={handleConfirmQuickAdd}
-                  className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary text-primary-foreground"
+                  disabled={isUnavailable}
+                  className={cn(
+                    "inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium",
+                    isUnavailable
+                      ? "bg-muted text-muted-foreground cursor-not-allowed"
+                      : "bg-primary text-primary-foreground",
+                  )}
                 >
                   <ShoppingBag className="w-4 h-4" />
-                  Ajouter
+                  {isUnavailable ? "Indisponible" : "Ajouter"}
                 </button>
               </div>
             </div>

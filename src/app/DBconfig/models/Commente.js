@@ -10,5 +10,7 @@ const CommentsSchema = new Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
+CommentsSchema.index({ id_product: 1, createdAt: -1 });
+
 const CommentsModal = models.Commente || mongoose.model("Commente", CommentsSchema);
 module.exports = CommentsModal;

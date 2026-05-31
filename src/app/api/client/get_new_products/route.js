@@ -8,7 +8,7 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get("limit")) || 16;
 
-    const products = await ProductModal.find({ disponible: "disponible", isNew: true })
+    const products = await ProductModal.find({ isNew: true })
       .sort({ createdAt: -1 })
       .limit(limit)
       .lean();

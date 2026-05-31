@@ -99,13 +99,17 @@
 
 "use client";
 
-import { useRef } from "react";
+import Image from "next/image";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
 import { categories } from "@/data/products";
 
+const fallbackUnsplash = "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=320&h=320&fit=crop";
+
 export const CategoryCarousel = () => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [imgErrors, setImgErrors] = useState<Record<string, boolean>>({});
 
   const scroll = (direction: "left" | "right") => {
     if (scrollRef.current) {
@@ -165,14 +169,13 @@ export const CategoryCarousel = () => {
                 <div className="relative w-32 sm:w-44 lg:w-52 bg-card rounded-3xl overflow-hidden shadow-luxury hover:shadow-elevated transition-all duration-500 border border-border/60 hover:border-primary/30">
                   <div className="relative aspect-square overflow-hidden">
                     <div className="absolute inset-0 bg-gradient-to-t from-charcoal/70 via-transparent to-transparent z-10" />
-                    <img
-                      src={category.img_url || "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=320&h=320&fit=crop"}
+                    <Image
+                      src={imgErrors[category.name] ? fallbackUnsplash : (category.img_url || fallbackUnsplash)}
                       alt={category.name}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover/card:scale-110"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).src =
-                          "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=320&h=320&fit=crop";
-                      }}
+                      fill
+                      className="object-cover transition-transform duration-700 group-hover/card:scale-110"
+                      sizes="(max-width: 640px) 128px, (max-width: 1024px) 176px, 208px"
+                      onError={() => setImgErrors((prev) => ({ ...prev, [category.name]: true }))}
                     />
                     <div className="absolute bottom-3 left-3 right-3 z-20">
                       <div className="inline-flex items-center gap-2 rounded-full bg-background/90 px-3 py-1 text-[9px] sm:text-xs font-semibold text-foreground shadow-lg">

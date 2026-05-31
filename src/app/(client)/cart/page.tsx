@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Truck, ChevronLeft, Shield, CreditCard, Star } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/home/Footer";
@@ -59,6 +60,8 @@ const calculateTotalPricev2 = (
 
   return finalPrice;
 };
+
+export const dynamic = "force-dynamic";
 
 export default function CartPage() {
   const { refreshCartCount } = useCart();
@@ -153,16 +156,19 @@ export default function CartPage() {
   };
 
   const handleClearCart = async () => {
+    const id_user = resolveClientUserId(user?.id);
+    if (!id_user) return;
     try {
-      await Promise.all(
-        dataCart.map((item) =>
-          fetch("/api/client/delete_cart_client", {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id_item: item._id }),
-          }),
-        ),
-      );
+      const res = await fetch("/api/client/clear_cart", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id_user }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        toast.error(body?.error || "Impossible de vider le panier");
+        return;
+      }
       setDataCart([]);
       await refreshCartCount();
       toast.success("Panier vidé");
@@ -359,10 +365,12 @@ export default function CartPage() {
                   >
                     <Link href={`/product/${item.id_product?._id}`} className="shrink-0">
                       <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-muted">
-                        <img
-                          src={item.caracteristique_couleur?.img || item.id_product?.array_ProductImg?.[0]?.secure_url}
+                        <Image
+                          src={item.caracteristique_couleur?.img || item.id_product?.array_ProductImg?.[0]?.secure_url || "/placeholder.svg"}
                           alt={item.id_product?.title?.fr || "Produit"}
-                          className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                          fill
+                          sizes="(max-width: 640px) 96px, 128px"
+                          className="object-cover hover:scale-110 transition-transform duration-500"
                         />
                       </div>
                     </Link>

@@ -16,13 +16,13 @@ export async function GET(request) {
     const skip = (page - 1) * limit;
 
     // 4. Get paginated data
-    const arr_data = await ProductModal.find({ disponible: "disponible" })
+    const arr_data = await ProductModal.find({})
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
     // 5. Get total count for pagination info
-    const total = await ProductModal.countDocuments({ disponible: "disponible" });
+    const total = await ProductModal.countDocuments({});
     const totalPages = Math.ceil(total / limit);
 
     // 6. Return data with pagination info

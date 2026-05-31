@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -109,7 +110,7 @@ export const HeroSlider = () => {
                 transform: `translateY(${parallaxOffset}px) scale(1.1)`,
               }}
             >
-              <img src={slide.img} alt={slide.title} className="w-full h-full object-cover" />
+              <Image src={slide.img} alt={slide.title} fill className="object-cover" sizes="100vw" />
             </div>
 
             <div className="absolute inset-0 z-20 flex items-center">

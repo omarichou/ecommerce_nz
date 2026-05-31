@@ -34,7 +34,6 @@ export async function GET(request) {
     const relatedProducts = await ProductModal.find({
       _id: { $ne: productId }, // Exclure le produit actuel
       categorie: currentProduct.categorie, // Même catégorie
-      disponible: "disponible", // Seulement les produits disponibles
     })
       .sort({ purchaseCount: -1, createdAt: -1 }) // Trier par popularité puis par date
       .limit(limit)
@@ -47,7 +46,6 @@ export async function GET(request) {
           $ne: productId,
           $nin: relatedProducts.map(p => p._id)
         },
-        disponible: "disponible",
       })
         .sort({ purchaseCount: -1, createdAt: -1 })
         .limit(limit - relatedProducts.length)

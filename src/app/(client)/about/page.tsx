@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Heart, Award, Users, Truck, CheckCircle2, Sparkles } from "lucide-react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/home/Footer";
@@ -69,11 +70,13 @@ export default function AboutPage() {
         <section className="container mx-auto px-4 py-16">
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-6xl mx-auto">
             <div className="relative">
-              <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
-                <img
+              <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
+                <Image
                   src="/hero/henna-hero.png"
                   alt="Notre atelier"
-                  className="w-full h-full object-cover"
+                  fill
+                  sizes="(max-width: 1024px) 100vw, 50vw"
+                  className="object-cover"
                 />
               </div>
               <div className="absolute -bottom-6 -right-6 w-32 h-32 sm:w-48 sm:h-48 rounded-2xl bg-gradient-gold flex items-center justify-center shadow-gold">
@@ -190,39 +193,47 @@ export default function AboutPage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-4">
-                  <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-muted">
-                    <img
+                  <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted">
+                    <Image
                     src="/category_image2/loouazem-khitba.png"
                       alt="Accessoires fiançailles"
-                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                      fill
+                      sizes="(max-width: 640px) 50vw, 25vw"
+                      className="object-cover hover:scale-110 transition-transform duration-500"
                     />
                   </div>
-                  <div className="aspect-square rounded-2xl overflow-hidden bg-muted">
+                  <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted">
                     {/* <img
                       src="/category_image2/tabaq-henna.png"
                       alt="Plateau henné"
                       className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
                     /> */}
-                      <img
+                      <Image
                       src="/category_image2/tabaq-henna.png"
                       alt="Plateau henné"
-                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                      fill
+                      sizes="(max-width: 640px) 50vw, 25vw"
+                      className="object-cover hover:scale-110 transition-transform duration-500"
                     />
                   </div>
                 </div>
                 <div className="space-y-4 pt-8">
-                  <div className="aspect-square rounded-2xl overflow-hidden bg-muted">
-                    <img
+                  <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted">
+                    <Image
                       src="/category_image2/qaada-henna.png"
                       alt="Soirée henné"
-                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                      fill
+                      sizes="(max-width: 640px) 50vw, 25vw"
+                      className="object-cover hover:scale-110 transition-transform duration-500"
                     />
                   </div>
-                  <div className="aspect-[3/4] rounded-2xl overflow-hidden bg-muted">
-                    <img
+                  <div className="relative aspect-[3/4] rounded-2xl overflow-hidden bg-muted">
+                    <Image
                       src="/category_image2/libas-takharuj.png"
                       alt="Tenues remise de diplôme"
-                      className="w-full h-full object-cover hover:scale-110 transition-transform duration-500"
+                      fill
+                      sizes="(max-width: 640px) 50vw, 25vw"
+                      className="object-cover hover:scale-110 transition-transform duration-500"
                     />
                   </div>
                 </div>

@@ -15,7 +15,7 @@ export async function GET(request) {
   const minPrice = Number(params.get("minPrice") || "0");
   const maxPrice = Number(params.get("maxPrice") || "1000000");
 
-  const filter = { disponible: "disponible" };
+  const filter = {};
 
   if (category) {
     filter.categorie = category;

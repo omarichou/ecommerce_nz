@@ -17,7 +17,7 @@ export async function GET(request) {
 // const arr_data = await  ProductModal.find({dipsonible:"disponible"})
 
 
-const arr_data = await ProductModal.find({disponible:"disponible"})
+const arr_data = await ProductModal.find({})
 .sort({ purchaseCount: -1 })
 .limit(limit); // Limite les produits les plus achetés
 

@@ -11,6 +11,7 @@ export interface Product {
   rating: number;
   isNew?: boolean;
   isPopular?: boolean;
+  disponible?: string;
 }
 
 export interface Category {

@@ -9,7 +9,6 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get("limit")) || 16;
 
     const products = await ProductModal.find({
-      disponible: "disponible",
       $or: [{ ancien_price: { $gt: 0 } }, { "reduction.reduction": { $gt: 0 } }],
     })
       .sort({ createdAt: -1 })
