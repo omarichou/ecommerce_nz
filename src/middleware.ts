@@ -87,6 +87,7 @@ const applyRateLimit = (request: NextRequest): NextResponse | null => {
 
 /* ────────────── CORS ────────────── */
 
+
 const getAllowedOrigins = (): string[] => {
   const origins = new Set<string>();
   const envOrigins = [
