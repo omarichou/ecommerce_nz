@@ -15,7 +15,7 @@ export async function POST(request) {
   await connectMongoDB();
 
   const subscribers = await NewsletterSubscriberModal.find({ active: true, verified: true });
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = process.env.NEXT_PUBLIC_MY_URL || "";
 
   let sent = 0;
   let failed = 0;

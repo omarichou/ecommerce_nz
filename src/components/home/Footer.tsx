@@ -161,8 +161,8 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
               </li>
               <li className="flex items-center gap-3">
                 <Mail className="w-5 h-5 text-primary flex-shrink-0" />
-                <a href="mailto:nzresineart@gmail.com" className="text-background/70 hover:text-background transition-colors">
-                  nzresineart@gmail.com
+                <a href="mailto:Zinejod454@gmail com" className="text-background/70 hover:text-background transition-colors">
+                  Zinejod454@gmail com
                 </a>
               </li>
             </ul>
@@ -176,7 +176,7 @@ const Footer = forwardRef<HTMLElement>((_, ref) => {
             <p className="text-background/50 text-sm font-body">
               © {" "}
               <span onClick={handleSecretClick} className="cursor-default select-none" title="">
-                2024
+                2026
               </span>{" "}
               Ateliers Henna & Traditions. Tous droits réservés.
             </p>

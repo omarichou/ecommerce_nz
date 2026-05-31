@@ -34,7 +34,7 @@ export default function ContactPage() {
   const contactInfo = [
     { icon: MapPin, title: "Adresse", content: "Nedroma, Tlemcen, Algérie", subtitle: "Ateliers Henna & Traditions" },
     { icon: Phone, title: "Téléphone", content: "0772 11 87 70", subtitle: "Du Samedi au Jeudi" },
-    { icon: Mail, title: "Email", content: "nzresineart@gmail.com", subtitle: "Réponse sous 24h" },
+    { icon: Mail, title: "Email", content: "Zinejod454@gmail com", subtitle: "Réponse sous 24h" },
     { icon: Clock, title: "Horaires", content: "9h00 - 18h00", subtitle: "Samedi - Jeudi" },
   ];
 

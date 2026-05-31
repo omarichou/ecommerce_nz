@@ -11,7 +11,7 @@ const formatCurrency = (value) => {
 };
 
 const resolveBaseUrl = () => {
-  const envUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL;
+  const envUrl = process.env.NEXT_PUBLIC_MY_URL || process.env.NEXTAUTH_URL;
   if (envUrl) return envUrl.replace(/\/$/, "");
   const vercel = process.env.VERCEL_URL;
   if (vercel) return `https://${vercel.replace(/\/$/, "")}`;

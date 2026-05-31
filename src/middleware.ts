@@ -90,7 +90,6 @@ const applyRateLimit = (request: NextRequest): NextResponse | null => {
 const getAllowedOrigins = (): string[] => {
   const origins = new Set<string>();
   const envOrigins = [
-    process.env.NEXT_PUBLIC_SITE_URL,
     process.env.NEXTAUTH_URL,
     process.env.NEXT_PUBLIC_MY_URL,
   ];

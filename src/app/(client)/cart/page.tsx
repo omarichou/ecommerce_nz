@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, Truck, ChevronLeft, Shield, CreditCard, Star } from "lucide-react";
@@ -11,6 +12,7 @@ import { toast } from "sonner";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { resolveClientUserId } from "@/lib/clientUserId";
+import { cartQueryKey, useCartItemsQuery } from "@/hooks/useCartItemsQuery";
 
 type CartProduct = {
   _id: string;
@@ -66,8 +68,10 @@ export const dynamic = "force-dynamic";
 export default function CartPage() {
   const { refreshCartCount } = useCart();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const id_user = resolveClientUserId(user?.id);
+  const [mounted, setMounted] = useState(false);
   const [dataCart, setDataCart] = useState<CartItemApi[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [promoInput, setPromoInput] = useState("");
   const [promoResult, setPromoResult] = useState<{
     code: string;
@@ -78,32 +82,16 @@ export default function CartPage() {
   } | null>(null);
   const [isApplyingPromo, setIsApplyingPromo] = useState(false);
 
-  const loadCart = useCallback(async () => {
-    const id_user = resolveClientUserId(user?.id);
-    if (!id_user) return;
-    setIsLoading(true);
-    try {
-      const res = await fetch("/api/client/get_cart_client", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_user }),
-      });
-      if (!res.ok) throw new Error("load");
-      const data: CartItemApi[] = await res.json();
-      setDataCart(data || []);
-      await refreshCartCount();
-    } catch (error) {
-      console.error(error);
-      toast.error("Impossible de charger le panier");
-      setDataCart([]);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [refreshCartCount, user?.id]);
+  const { data: cartItems = [], isLoading } = useCartItemsQuery(id_user);
 
   useEffect(() => {
-    void loadCart();
-  }, [loadCart]);
+    setDataCart((cartItems as CartItemApi[]) || []);
+  }, [cartItems]);
+
+  useEffect(() => {
+    if (!id_user) return;
+    void refreshCartCount();
+  }, [id_user, refreshCartCount, dataCart.length]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -111,6 +99,10 @@ export default function CartPage() {
     if (storedCode) {
       setPromoInput(storedCode);
     }
+  }, []);
+
+  useEffect(() => {
+    setMounted(true);
   }, []);
 
   const handleDeleteItem = async (id_item: string) => {
@@ -121,7 +113,9 @@ export default function CartPage() {
         body: JSON.stringify({ id_item }),
       });
       if (!res.ok) throw new Error("delete");
-      setDataCart((prev) => prev.filter((item) => item._id !== id_item));
+      const next = dataCart.filter((item) => item._id !== id_item);
+      setDataCart(next);
+      if (id_user) queryClient.setQueryData(cartQueryKey(id_user), next);
       await refreshCartCount();
       toast.success("Produit supprimé du panier");
     } catch (error) {
@@ -143,11 +137,11 @@ export default function CartPage() {
         body: JSON.stringify({ _id: item._id, quantite: nextQuantity }),
       });
       if (!res.ok) throw new Error("update");
-      setDataCart((prev) =>
-        prev.map((cartItem) =>
-          cartItem._id === item._id ? { ...cartItem, quantite: nextQuantity } : cartItem,
-        ),
+      const next = dataCart.map((cartItem) =>
+        cartItem._id === item._id ? { ...cartItem, quantite: nextQuantity } : cartItem,
       );
+      setDataCart(next);
+      if (id_user) queryClient.setQueryData(cartQueryKey(id_user), next);
       await refreshCartCount();
     } catch (error) {
       console.error(error);
@@ -170,6 +164,7 @@ export default function CartPage() {
         return;
       }
       setDataCart([]);
+      if (id_user) queryClient.setQueryData(cartQueryKey(id_user), []);
       await refreshCartCount();
       toast.success("Panier vidé");
     } catch (error) {
@@ -263,6 +258,18 @@ export default function CartPage() {
       setPromoResult(null);
     }
   }, [dataCart, promoInput, applyPromoCode]);
+
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <main className="pt-28 sm:pt-32 pb-20">
+          <div className="container mx-auto px-4 max-w-6xl" />
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   if (!isLoading && dataCart.length === 0) {
     return (
@@ -364,7 +371,7 @@ export default function CartPage() {
                     className="bg-card border border-border rounded-xl p-4 sm:p-6 flex gap-4 sm:gap-6 animate-fade-in"
                   >
                     <Link href={`/product/${item.id_product?._id}`} className="shrink-0">
-                      <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-muted">
+                      <div className="relative w-24 h-24 sm:w-32 sm:h-32 rounded-lg overflow-hidden bg-muted">
                         <Image
                           src={item.caracteristique_couleur?.img || item.id_product?.array_ProductImg?.[0]?.secure_url || "/placeholder.svg"}
                           alt={item.id_product?.title?.fr || "Produit"}

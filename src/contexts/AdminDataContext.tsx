@@ -610,7 +610,7 @@ const generateMockSubscribers = (): NewsletterSubscriber[] => [
 const defaultSettings: StoreSettings = {
   storeName: "Ateliers Henna & Traditions",
   logo: "",
-  email: "nzresineart@gmail.com",
+  email: "Zinejod454@gmail com",
   phone: "0772 11 87 70",
   address: "Nedroma, Tlemcen, Algérie",
   currency: "DZD",

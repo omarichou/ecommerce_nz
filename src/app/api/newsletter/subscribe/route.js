@@ -41,7 +41,7 @@ export async function POST(request) {
 
   await connectMongoDB();
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "";
+  const siteUrl = process.env.NEXT_PUBLIC_MY_URL || "";
   const verificationToken = crypto.randomBytes(24).toString("hex");
   const unsubscribeToken = crypto.randomBytes(24).toString("hex");
 

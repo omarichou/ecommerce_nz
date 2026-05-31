@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -20,6 +21,7 @@ import {
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { resolveClientUserId } from "@/lib/clientUserId";
+import { cartQueryKey, useCartItemsQuery } from "@/hooks/useCartItemsQuery";
 
 type CartProduct = {
   _id: string;
@@ -91,10 +93,11 @@ export default function CheckoutPage() {
   const router = useRouter();
   const { refreshCartCount } = useCart();
   const { user } = useAuth();
+  const queryClient = useQueryClient();
+  const id_user = resolveClientUserId(user?.id);
   const [currentStep, setCurrentStep] = useState<CheckoutStep>("cart");
   const [isProcessing, setIsProcessing] = useState(false);
   const [dataCart, setDataCart] = useState<CartItemApi[]>([]);
-  const [isLoadingCart, setIsLoadingCart] = useState(true);
   const [deliveryFees, setDeliveryFees] = useState(0);
   const [centers, setCenters] = useState<RelayCenter[]>([]);
   const [isLoadingCenters, setIsLoadingCenters] = useState(false);
@@ -125,32 +128,16 @@ export default function CheckoutPage() {
     note: "",
   });
 
-  const loadCart = useCallback(async () => {
-    const id_user = resolveClientUserId(user?.id);
-    if (!id_user) return;
-    setIsLoadingCart(true);
-    try {
-      const res = await fetch("/api/client/get_cart_client", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id_user }),
-      });
-      if (!res.ok) throw new Error("load");
-      const data: CartItemApi[] = await res.json();
-      setDataCart(data || []);
-      await refreshCartCount();
-    } catch (error) {
-      console.error(error);
-      toast.error("Impossible de charger le panier");
-      setDataCart([]);
-    } finally {
-      setIsLoadingCart(false);
-    }
-  }, [refreshCartCount, user?.id]);
+  const { data: cartItems = [], isLoading: isLoadingCart } = useCartItemsQuery(id_user);
 
   useEffect(() => {
-    void loadCart();
-  }, [loadCart]);
+    setDataCart((cartItems as CartItemApi[]) || []);
+  }, [cartItems]);
+
+  useEffect(() => {
+    if (!id_user) return;
+    void refreshCartCount();
+  }, [id_user, refreshCartCount, dataCart.length]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -168,7 +155,9 @@ export default function CheckoutPage() {
         body: JSON.stringify({ id_item }),
       });
       if (!res.ok) throw new Error("delete");
-      setDataCart((prev) => prev.filter((item) => item._id !== id_item));
+      const next = dataCart.filter((item) => item._id !== id_item);
+      setDataCart(next);
+      if (id_user) queryClient.setQueryData(cartQueryKey(id_user), next);
       await refreshCartCount();
     } catch (error) {
       console.error(error);
@@ -189,11 +178,11 @@ export default function CheckoutPage() {
         body: JSON.stringify({ _id: item._id, quantite: nextQuantity }),
       });
       if (!res.ok) throw new Error("update");
-      setDataCart((prev) =>
-        prev.map((cartItem) =>
-          cartItem._id === item._id ? { ...cartItem, quantite: nextQuantity } : cartItem,
-        ),
+      const next = dataCart.map((cartItem) =>
+        cartItem._id === item._id ? { ...cartItem, quantite: nextQuantity } : cartItem,
       );
+      setDataCart(next);
+      if (id_user) queryClient.setQueryData(cartQueryKey(id_user), next);
       await refreshCartCount();
     } catch (error) {
       console.error(error);
@@ -531,6 +520,7 @@ export default function CheckoutPage() {
       });
 
       setDataCart([]);
+      queryClient.setQueryData(cartQueryKey(id_user), []);
       await refreshCartCount();
 
       const orderNumber = orderResult?.orderNumber;
@@ -623,13 +613,15 @@ export default function CheckoutPage() {
                     dataCart.map((item) => (
                       <div key={item._id} className="flex gap-4 p-4 bg-card rounded-xl border border-border">
                         <Link href={`/product/${item.id_product?._id}`} className="shrink-0">
-                          <Image
-                            src={item.caracteristique_couleur?.img || item.id_product?.array_ProductImg?.[0]?.secure_url || "/placeholder.svg"}
-                            alt={item.id_product?.title?.fr || "Produit"}
-                            width={96}
-                            height={96}
-                            className="object-cover rounded-lg"
-                          />
+                          <div className="relative w-24 h-24 rounded-lg overflow-hidden bg-muted">
+                            <Image
+                              src={item.caracteristique_couleur?.img || item.id_product?.array_ProductImg?.[0]?.secure_url || "/placeholder.svg"}
+                              alt={item.id_product?.title?.fr || "Produit"}
+                              fill
+                              sizes="96px"
+                              className="object-cover"
+                            />
+                          </div>
                         </Link>
                         <div className="flex-1 min-w-0">
                           <Link href={`/product/${item.id_product?._id}`}>
